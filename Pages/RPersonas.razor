@@ -1,0 +1,146 @@
+﻿@page "/rpersonas"
+@using FormularioCompleto.DAL;
+@using FormularioCompleto.Controllers;
+@using FormularioCompleto.Data;
+@using FormularioCompleto.Models;
+<h3>Registro de Personas</h3>
+
+<h4>@Estado</h4>
+
+<EditForm Model="Persona" OnValidSubmit="Guardar">
+    <div class="container-fluid">
+        <div class="form-group">
+            <label for="PersonaIdNumber">Persona ID: </label>
+            <div class="input-group">
+                <InputNumber id="PersonaIdNumber" @bind-Value="Persona.ID" class="form-control" />
+                <button type="button" class="btn btn-primary" @onclick="Buscar"> Buscar</button>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="PersonaNacimientoDate">Fecha de Nacimiento: </label>
+            <InputDate id="PersonaNacimientoDate" @bind-Value="Persona.Nacimiento" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label for="PersonaNombreText">Nombre: </label>
+            <InputText id="PersonaNombreText" @bind-Value="Persona.Nombre" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label for="PersonaCedulaText">Cedula: </label>
+            <InputText id="PersonaCedulaoText" @bind-Value="Persona.Cedula" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label for="PersonaTelefonoText">Telefono: </label>
+            <InputText id="PersonaTelefonoText" @bind-Value="Persona.Telefono" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label for="PersonaDireccionText">Direccion: </label>
+            <InputText id="PersonaDireccionText" @bind-Value="Persona.Direccion" class="form-control" />
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-secondary" type="button" @onclick="Nuevo">Nuevo</button>
+            <button class="btn btn-success">Guardar</button>
+            <button class="btn btn-danger" type="button" @onclick="Eliminar">Eliminar</button>
+        </div>
+    </div>
+</EditForm>
+
+
+
+@code {
+    public Personas Persona { get; set; } = new Personas();
+    public string Estado = string.Empty;
+
+    private bool validate()
+    {
+        bool paso = true;
+        if (Persona.ID < 0)
+            paso = false;
+        if (Persona.Nombre.Length > 40)
+            paso = false;
+        if (Persona.Cedula.Length < 11 || Persona.Cedula.Length > 11)
+            paso = false;
+        if (Persona.Telefono.Length!=10)
+            paso = false;
+        return paso;
+    }
+
+    private void Guardar()
+    {
+        if(validate())
+        {
+            if (PersonasController.Guardar(Persona))
+            {
+                Estado = "Guardado";
+                Limpiar();
+            }
+            else
+            {
+                Estado = "Hubo un error";
+            }
+        }
+
+    }
+    private void Buscar()
+    {
+        try
+        {
+            int id = Persona.ID;
+            Persona = PersonasController.Buscar(id);
+            if (Persona != null)
+            {
+                Estado = "Encontrado";
+            }
+            else
+            {
+                Estado = "No existe";
+            }
+        }
+        catch (Exception ex)
+        {
+
+            Estado = ex.Message;
+        }
+
+    }
+    private void Nuevo()
+    {
+        Estado = string.Empty;
+        Limpiar();
+    }
+
+    private void Limpiar()
+    {
+        Persona = new Personas();
+
+    }
+
+    private void Eliminar()
+    {
+        try
+        {
+            int id = Persona.ID;
+            Persona = PersonasController.Buscar(id);
+            if (Persona != null)
+            {
+                if (PersonasController.Eliminar(id))
+                {
+                    Estado = "Eliminado Correctamente";
+                    Limpiar();
+                }
+                else
+                {
+                    Estado = "Hubo un Error";
+                }
+            }
+            else
+            {
+                Estado = "No existe";
+            }
+        }
+        catch (Exception ex1)
+        {
+
+            Estado = ex1.Message;
+        }
+    }
+}
